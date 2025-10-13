@@ -16,6 +16,15 @@ public class Employees {
         this.full_name = full_name;
         this.workshift = workshift;
     }
+    public int getId(){
+        return this.id;
+    }
+    public String getFull_name(){
+        return this.full_name;
+    }
+    public String getWorkshift(){
+        return this.workshift;
+    }
     public void setId(int a){
         this.id = a;
     }
