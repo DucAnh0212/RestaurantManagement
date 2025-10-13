@@ -19,6 +19,15 @@ public class MenuItems {
         this.name = name;
         this.price = price;
     }
+    public int getId(){
+        return this.id;
+    }
+    public int getPrice(){
+        return this.price;
+    }
+    public String getName(){
+        return this.name;
+    }
     public void setId(int a){
         this.id = a;
     }
