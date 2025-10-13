@@ -1,36 +1,66 @@
-package com.nhom.restaurant.models;
+package models;
 
-import java.util.*;
-public class Orders {
+import com.nhom.restaurant.utils.DatabaseConnector;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class OrderItems {
     private int id;
-    private int table_id;
-    private int total_amount;
-    private String status;
-    private String created_at;
-    private List<OrderItems> list;
+    private int orderid;
+    private String menu_item_name;
+    private int quantity;
+    private int price;
 
-    public Orders(int id, int table_id, int total_amount, String status){
-        this.id = id;
-        this.table_id = table_id;
-        this.total_amount = total_amount;
-        this.status = status;
+    public OrderItems(int id, int orderid, String menu_item_name, int quantity, int price){
+        this.id=id;
+        this.orderid=orderid;
+        this.menu_item_name=menu_item_name;
+        this.quantity=quantity;
+        this.price=price;
     }
 
-    public static Orders findActiveByTableId(int table_id){
-
+    public int getId() { return id;
+    }
+    public int getOrderId() { return orderid;
+    }
+    public String getMenuItemName() { return menu_item_name;
+    }
+    public int getQuantity() { return quantity;
+    }
+    public int getPrice() { return price;
     }
 
-    public void calculateTotal(){
+    public void save() throws SQLException {
+        String sql = "INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_NAME, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
 
+        try (Connection connection = DatabaseConnector.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+
+            preparedStatement.setInt(1, this.orderid);
+            preparedStatement.setString(2, this.menu_item_name);
+            preparedStatement.setInt(3, this.quantity);
+            preparedStatement.setInt(4, this.price);
+
+            preparedStatement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void save(){}
+    public void update() throws SQLException {
+        String sql = "UPDATE OrderItems SET QUANTITY = ? WHERE ID = ?";
 
-    public void markAsPaid(){}
+        try(Connection connection = DatabaseConnector.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
 
-    public void markAsCancel(){}
+            preparedStatement.setInt(1, this.quantity);
+            preparedStatement.setInt(2, this.id);
 
-    public void collectOrderItem(){}
-
-    public void setTime(){}
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
