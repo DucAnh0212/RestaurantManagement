@@ -163,7 +163,7 @@ INSERT INTO employees(FULLNAME, WORKSHIFT) VALUES
 ('Trương Đức Tùng', '17:00 - 22:00'),
 ('Nguyễn Trung Tín', '10:00 - 15:00'), 
 ('Vũ Minh Sáng', '17:00 - 22:00'), 
-('Nguyễn Hải Nam', '10:00 - 15:00'), employees
+('Nguyễn Hải Nam', '10:00 - 15:00'), 
 ('Trần Hiếu Bình', '10:00 - 15:00'), 
 ('Nguyễn Gia Bảo', '17:00 - 22:00'), 
 ('Lê Hải Duy', '17:00 - 22:00'), 
