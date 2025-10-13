@@ -1,4 +1,4 @@
-package mcom.nhom.restaurant.models;
+package com.nhom.restaurant.models;
 
 import com.nhom.restaurant.utils.DatabaseConnector;
 
@@ -68,4 +68,5 @@ public class OrderItems {
         }
     }
 }
+
 
