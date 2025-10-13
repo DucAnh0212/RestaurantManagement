@@ -19,6 +19,15 @@ public class Tables {
         this.floor = floor;
         this.status = status;
     }
+    public int getId(){
+        return this.id;
+    }
+    public int getFloor(){
+        return this.floor;
+    }
+    public String getStatus(){
+        return this.status;
+    }
     public void setId(int a){
         this.id = a;
     }
