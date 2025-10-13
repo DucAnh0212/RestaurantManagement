@@ -21,16 +21,20 @@ public class OrderItems {
         this.price=price;
     }
 
-    public int getId() { return id;
-    }
-    public int getOrderId() { return orderid;
-    }
-    public String getMenuItemName() { return menu_item_name;
-    }
-    public int getQuantity() { return quantity;
-    }
-    public int getPrice() { return price;
-    }
+    public int getId() { return id;}
+    public void setId(int id) {this.id = id;}
+
+    public int getOrderId() { return orderid;}
+    public void setOrderid(int orderid) {this.orderid = orderid;}
+
+    public String getMenuItemName() { return menu_item_name;}
+    public void setMenu_item_name(String menu_item_name) {this.menu_item_name = menu_item_name;}
+
+    public int getQuantity() { return quantity;}
+    public void setQuantity(int quantity) {this.quantity = quantity;}
+
+    public int getPrice() { return price;}
+    public void setPrice(int price) {this.price = price;}
 
     public void save() throws SQLException {
         String sql = "INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_NAME, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
