@@ -1,70 +1,107 @@
 package models;
-
 import com.nhom.restaurant.utils.DatabaseConnector;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.*;
 
-public class OrderItems {
+public class Orders {
     private int id;
-    private int orderid;
-    private String menu_item_name;
-    private int quantity;
-    private int price;
+    private int table_id;
+    private double total_amount;
+    private String status;
+    private String created_at;
+    private List<OrderItems> list;
 
-    public OrderItems(int id, int orderid, String menu_item_name, int quantity, int price){
+    public Orders(int id, int tableId, int totalAmount, String status, String createdAt){
         this.id=id;
-        this.orderid=orderid;
-        this.menu_item_name=menu_item_name;
-        this.quantity=quantity;
-        this.price=price;
+        this.table_id=table_id;
+        this.total_amount=total_amount;
+        this.status=status;
+        this.created_at = createdAt;
+        this.list = new ArrayList<>();
     }
 
-    public int getId() { return id;}
-    public void setId(int id) {this.id = id;}
-
-    public int getOrderId() { return orderid;}
-    public void setOrderid(int orderid) {this.orderid = orderid;}
-
-    public String getMenuItemName() { return menu_item_name;}
-    public void setMenu_item_name(String menu_item_name) {this.menu_item_name = menu_item_name;}
-
-    public int getQuantity() { return quantity;}
-    public void setQuantity(int quantity) {this.quantity = quantity;}
-
-    public int getPrice() { return price;}
-    public void setPrice(int price) {this.price = price;}
-
-    public void save() throws SQLException {
-        String sql = "INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_NAME, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
-
-        try (Connection connection = DatabaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-
-            preparedStatement.setInt(1, this.orderid);
-            preparedStatement.setString(2, this.menu_item_name);
-            preparedStatement.setInt(3, this.quantity);
-            preparedStatement.setInt(4, this.price);
-
-            preparedStatement.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public int getId() {
+        return this.id;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public void update() throws SQLException {
-        String sql = "UPDATE OrderItems SET QUANTITY = ? WHERE ID = ?";
+    public int getTableId() {
+        return this.table_id;
+    }
 
+    public void setTableId(int tableId) {
+        this.table_id = tableId;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public double getTotalAmount() {
+        return this.total_amount;
+    }
+    public void setTotalAmount(double totalAmount) {
+        this.total_amount = totalAmount;
+    }
+
+    public String getCreatedAt() {
+        return this.created_at;
+    }
+    public void setCreatedAt(String createdAt) {
+        this.created_at = createdAt;
+    }
+
+    public List<OrderItems> getItems() {
+        return this.list;
+    }
+    public void setItems(List<OrderItems> items) {
+        this.list = items;
+    }
+
+    public static Orders findActiveByTableId(int table_id) throws SQLException {
+        String sql = "SELECT * FROM Orders Where ID = ? AND STATUS = 'Đang hoạt động'";
+        Orders foundTable = null;
         try(Connection connection = DatabaseConnector.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-
-            preparedStatement.setInt(1, this.quantity);
-            preparedStatement.setInt(2, this.id);
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
+            preparedStatement.setInt(1, id);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()) {
+                foundTable = new Orders();
+                foundTable.setId(rs.getInt("ID"));
+                foundTable.setTableId(rs.getInt("TABLE_ID"));
+                foundTable.setTotalAmount(rs.getInt("TOTAL_AMOUNT"));
+                foundTable.setStatus(rs.getInt("STATUS"));
+                foundTable.setCreatedAt(rs.getInt("CREATED_AT"));
+            }
+        } catch (SQLException e){
             e.printStackTrace();
         }
+        return foundTable;
     }
+
+    public static void List<OrderItems>
+
+    public void calculateTotal(){
+        int currentTotal = 0;
+        for (OrderItems item : this.list) {
+            currentTotal += list.get();
+        }
+        this.total_amount = currentTotal;
+    }
+
+    public void save(){}
+
+    public void markAsPaid(){}
+
+    public void markAsCancel(){}
+
+    public void collectOrderItem(){}
+
+    public void setTime(){}
 }
