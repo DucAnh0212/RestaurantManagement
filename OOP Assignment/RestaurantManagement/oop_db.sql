@@ -16,8 +16,8 @@ CREATE TABLE Employees (
 CREATE TABLE Orders (
     ID INT PRIMARY KEY AUTO_INCREMENT,
     TABLE_ID INT NOT NULL,
-    TOTAL_AMOUNT INT DEFAULT 0,
     STATUS ENUM('Đang hoạt động', 'Đã thanh toán', 'Đã hủy') NOT NULL DEFAULT 'Đang hoạt động',
+    TOTAL_AMOUNT INT DEFAULT 0,
     CREATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (TABLE_ID) REFERENCES Tables(ID)
 );
@@ -158,7 +158,7 @@ INSERT INTO Tables(FLOOR) VALUES
 (3);
 INSERT INTO employees(FULLNAME, WORKSHIFT) VALUES
 ('Nguyễn Đức Anh', '10:00 - 15:00'),
-('Nguyễn Đức Mạnh', '10:00 - 15:00'), 
+('Nguyễn Đức Mạnh', '10:00 - 15:00'),
 ('An Việt Quyền', '17:00 - 22:00'),
 ('Trương Đức Tùng', '17:00 - 22:00'),
 ('Nguyễn Trung Tín', '10:00 - 15:00'),
