@@ -60,6 +60,7 @@ public class Orders {
         try{
             newItem.save();
             this.items.add(newItem);
+            this.updateTotalAmount();
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -127,6 +128,25 @@ public class Orders {
             }
         }
     }
+    public static Orders findById(int idToFind) throws  SQLException{
+        String sql = "SELECT * FROM Orders WHERE ID = ?";
+        Orders OrderToFind = null;
+        try(Connection connection = DatabaseConnector.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(sql)){
+            pstmt.setInt(1, idToFind);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next()) {
+                OrderToFind = new Orders();
+                OrderToFind.setId(rs.getInt("ID"));
+                OrderToFind.setTable_id(rs.getInt("TABLE_ID"));
+                OrderToFind.setStatus(rs.getString("STATUS"));
+                OrderToFind.setTotal_amount(rs.getInt("TOTAL_AMOUNT"));
+                OrderToFind.setCreated_at(rs.getTimestamp("CREATED_AT"));
+                OrderToFind.fetchOrderItems();
+            }
+        }
+        return OrderToFind;
+    }
     public static Orders findActiveByTableId(int table_id) throws  SQLException{
         String sql = "SELECT * FROM Orders WHERE TABLE_ID = ? AND STATUS = 'Đang hoạt động' LIMIT 1";
         Orders activeOrder = null;
@@ -137,13 +157,23 @@ public class Orders {
             if(rs.next()){
                 activeOrder = new Orders();
                 activeOrder.setId(rs.getInt("ID"));
-                activeOrder.setTable_id(rs.getInt("table_id"));
-                activeOrder.setStatus(rs.getString("status"));
-                activeOrder.setTotal_amount(rs.getInt("total_amount"));
-                activeOrder.setCreated_at(rs.getTimestamp("created_at"));
+                activeOrder.setTable_id(rs.getInt("TABLE_ID"));
+                activeOrder.setStatus(rs.getString("STATUS"));
+                activeOrder.setTotal_amount(rs.getInt("TOTAL_AMOUNT"));
+                activeOrder.setCreated_at(rs.getTimestamp("CREATED_AT"));
                 activeOrder.fetchOrderItems();
             }
         }
         return activeOrder;
+    }
+    public void updateTotalAmount() throws SQLException {
+        int currentTotal = this.calculateTotal();
+        String sql = "UPDATE Orders SET total_amount = ? WHERE id = ?";
+        try (Connection connection = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, currentTotal);
+            pstmt.setInt(2, this.id);
+            pstmt.executeUpdate();
+        }
     }
 }
