@@ -1,6 +1,7 @@
 package com.nhom.restaurant.models;
 
 import com.nhom.restaurant.utils.DatabaseConnector;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -37,11 +38,22 @@ public class Tables {
     public void setStatus(String a){
         this.status = a;
     }
-    public void markAsOccupied(){
-        this.status = "Occupied";
+    public void markAsOccupied() throws  SQLException {
+        this.status = "Có khách";
+        updateStatus();
     }
-    public void markAsAvailable(){
-        this.status = "Available";
+    public void markAsAvailable() throws  SQLException {
+        this.status = "Trống";
+        updateStatus();
+    }
+    public void updateStatus() throws SQLException {
+        String sql = "UPDATE Tables SET STATUS = ? WHERE id = ?";
+        try (Connection connection = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)){
+            pstmt.setString(1, this.status);
+            pstmt.setInt(2, this.id);
+            pstmt.executeUpdate();
+        }
     }
     public static Tables findById(int tableId) {
         String sql = "SELECT * FROM Tables WHERE ID = ?";
