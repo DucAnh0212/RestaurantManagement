@@ -52,6 +52,7 @@ public class OrderItems {
     public void setPrice(int price) {
         this.price = price;
     }
+
     public void save() throws SQLException {
         String sql = "INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_ID, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
         try (Connection connection = DatabaseConnector.getConnection();
@@ -60,7 +61,7 @@ public class OrderItems {
             preparedStatement.setInt(2, this.menu_item_id);
             preparedStatement.setInt(3, this.quantity);
             preparedStatement.setInt(4, this.price);
-            preparedStatement.executeQuery();
+            preparedStatement.executeUpdate();
         }
         catch (SQLException e) {
             e.printStackTrace();
