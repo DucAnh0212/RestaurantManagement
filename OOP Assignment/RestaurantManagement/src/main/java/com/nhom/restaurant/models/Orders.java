@@ -51,6 +51,7 @@ public class Orders {
     public void setItems(List<OrderItems> a){
         this.items = a;
     }
+
     public void addItem(MenuItems menuItem, int quantity){
         OrderItems newItem = new OrderItems();
         newItem.setOrderId(this.id);
