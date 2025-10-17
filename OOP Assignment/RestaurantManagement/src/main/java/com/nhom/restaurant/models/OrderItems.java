@@ -26,58 +26,32 @@ public class OrderItems {
         return id;
     }
     public void setId(int id) {
-        this.id = id;
+        if(id>0) this.id = id;
     }
     public int getOrderId() {
         return orderid;
     }
     public void setOrderId(int a) {
-        this.orderid = a;
+        if(id>0) this.orderid = a;
     }
     public int getMenu_item_id() {
         return menu_item_id;
     }
     public void setMenu_item_id(int menu_item_id) {
-        this.menu_item_id = menu_item_id;
+        if(menu_item_id>0) this.menu_item_id = menu_item_id;
     }
     public int getQuantity() {
         return quantity;
     }
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        if(quantity >=0) this.quantity = quantity;
     }
     public int getPrice() {
         return price;
     }
     public void setPrice(int price) {
-        this.price = price;
-    }
-
-    public void save() throws SQLException {
-        String sql = "INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_ID, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setInt(1, this.orderid);
-            preparedStatement.setInt(2, this.menu_item_id);
-            preparedStatement.setInt(3, this.quantity);
-            preparedStatement.setInt(4, this.price);
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public void update() throws SQLException {
-        String sql = "UPDATE OrderItems SET QUANTITY = ? WHERE ID = ?";
-        try(Connection connection = DatabaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setInt(1, this.quantity);
-            preparedStatement.setInt(2, this.id);
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+        if(price>0) this.price = price;
+    } 
 }
+
 
