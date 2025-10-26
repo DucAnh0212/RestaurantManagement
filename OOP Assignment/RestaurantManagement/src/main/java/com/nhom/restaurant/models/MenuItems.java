@@ -29,13 +29,51 @@ public class MenuItems {
         return this.name;
     }
     public void setId(int a){
-        if(a>0) this.id = a;
+        this.id = a;
     }
     public void setName(String a){
         this.name = a;
     }
     public void setPrice(int a){
-        if(a>0) this.price = a;
+        this.price = a;
+    }
+    public static MenuItems findById(int id){
+        String sql = "SELECT * FROM MenuItems WHERE ID = ?";
+        MenuItems foundItem = null;
+        try(Connection connection = DatabaseConnector.getConnection();
+            PreparedStatement ptsmt = connection.prepareStatement(sql)){
+            ptsmt.setInt(1, id);
+            ResultSet rs = ptsmt.executeQuery();
+            if(rs.next()){
+                foundItem = new MenuItems();
+                foundItem.setId(rs.getInt("ID"));
+                foundItem.setName(rs.getString("NAME"));
+                foundItem.setPrice(rs.getInt("PRICE"));
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return foundItem;
+    }
+    public static List<MenuItems> findAll(){
+        String sql = "SELECT * FROM MenuItems";
+        List<MenuItems> allItem = new ArrayList<>();
+        try(Connection connection = DatabaseConnector.getConnection();
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)){
+            while(rs.next()){
+                MenuItems menuItem = new MenuItems();
+                menuItem.setId(rs.getInt("ID"));
+                menuItem.setName(rs.getString("NAME"));
+                menuItem.setPrice(rs.getInt("PRICE"));
+                allItem.add(menuItem);
+            }
+
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return allItem;
     }
 }
-
