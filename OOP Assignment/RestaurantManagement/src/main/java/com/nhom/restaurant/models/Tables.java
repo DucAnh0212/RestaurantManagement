@@ -30,13 +30,67 @@ public class Tables {
         return this.status;
     }
     public void setId(int a){
-        if(id>0) this.id = a;
+        this.id = a;
     }
     public void setFloor(int a){
-        if(0<a && a<4) this.floor = a;
+        this.floor = a;
     }
     public void setStatus(String a){
         this.status = a;
     }
+    public void markAsOccupied() throws  SQLException {
+        this.status = "Có khách";
+        updateStatus();
+    }
+    public void markAsAvailable() throws  SQLException {
+        this.status = "Trống";
+        updateStatus();
+    }
+    public void updateStatus() throws SQLException {
+        String sql = "UPDATE Tables SET STATUS = ? WHERE id = ?";
+        try (Connection connection = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)){
+            pstmt.setString(1, this.status);
+            pstmt.setInt(2, this.id);
+            pstmt.executeUpdate();
+        }
+    }
+    public static Tables findById(int tableId) {
+        String sql = "SELECT * FROM Tables WHERE ID = ?";
+        Tables foundTable = null;
+        try(Connection connection = DatabaseConnector.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, tableId);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next()){
+                foundTable = new Tables();
+                foundTable.setId(rs.getInt("ID"));
+                foundTable.setFloor(rs.getInt("FLOOR"));
+                foundTable.setStatus(rs.getString("STATUS"));
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return foundTable;
+    }
+    public static List<Tables> findAll(){
+        String sql = "SELECT * FROM Tables";
+        List<Tables> allTable = new ArrayList<>();
+        try(Connection connection = DatabaseConnector.getConnection();
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)){
+            while (rs.next()) {
+                Tables A = new Tables();
+                A.setId(rs.getInt("ID"));
+                A.setFloor(rs.getInt("FLOOR"));
+                A.setStatus(rs.getString("STATUS"));
+                allTable.add(A);
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        return allTable;
+    }
 }
-
