@@ -12,6 +12,7 @@ public class OrderItems {
     private int menu_item_id;
     private int quantity;
     private int price;
+    private String menu_item_name;
 
     public OrderItems(){
     }
@@ -52,6 +53,13 @@ public class OrderItems {
     public void setPrice(int price) {
         this.price = price;
     }
+    public String getMenu_item_name() {
+        return this.menu_item_name;
+    }
+
+    public void setMenu_item_name(String a) {
+        this.menu_item_name = a;
+    }
 
     public void save() throws SQLException {
         String sql = "INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_ID, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
@@ -63,9 +71,6 @@ public class OrderItems {
             preparedStatement.setInt(4, this.price);
             preparedStatement.executeUpdate();
         }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
     public void update() throws SQLException {
         String sql = "UPDATE OrderItems SET QUANTITY = ? WHERE ID = ?";
@@ -74,9 +79,6 @@ public class OrderItems {
             preparedStatement.setInt(1, this.quantity);
             preparedStatement.setInt(2, this.id);
             preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 }
