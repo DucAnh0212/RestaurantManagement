@@ -127,7 +127,9 @@ public class Orders {
     }
     public void fetchOrderItems() throws  SQLException {
         this.items.clear();
-        String sql = "SELECT * FROM OrderItems WHERE ORDER_ID = ?";
+        String sql = "SELECT OI.*, MI.NAME FROM OrderItems OI " +
+                "JOIN MenuItems MI ON OI.MENU_ITEM_ID = MI.ID " +
+                "WHERE OI.ORDER_ID = ?";
         try (Connection connection = DatabaseConnector.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)){
             pstmt.setInt(1, this.id);
@@ -137,6 +139,7 @@ public class Orders {
                 item.setId((rs.getInt("ID")));
                 item.setOrderId(rs.getInt("ORDER_ID"));
                 item.setMenu_item_id(rs.getInt("MENU_ITEM_ID"));
+                item.setMenu_item_name(rs.getString("NAME"));
                 item.setQuantity(rs.getInt("QUANTITY"));
                 item.setPrice(rs.getInt("PRICE"));
                 this.items.add(item);
@@ -156,8 +159,8 @@ public class Orders {
                 OrderToFind = new Orders();
                 OrderToFind.setId(rs.getInt("ID"));
                 OrderToFind.setTable_id(rs.getInt("TABLE_ID"));
-                OrderToFind.setEmployee_id(rs.getInt("EMPLOYEE_ID")); // <-- LẤY ID NHÂN VIÊN
-                OrderToFind.setEmployee_name(rs.getString("FULLNAME")); // <-- LẤY TÊN NHÂN VIÊN TỪ JOIN
+                OrderToFind.setEmployee_id(rs.getInt("EMPLOYEE_ID")); 
+                OrderToFind.setEmployee_name(rs.getString("FULLNAME")); 
                 OrderToFind.setStatus(rs.getString("STATUS"));
                 OrderToFind.setTotal_amount(rs.getInt("TOTAL_AMOUNT"));
                 OrderToFind.setCreated_at(rs.getTimestamp("CREATED_AT"));
