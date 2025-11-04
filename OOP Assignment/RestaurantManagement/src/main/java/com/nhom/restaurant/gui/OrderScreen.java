@@ -51,7 +51,10 @@ public class OrderScreen extends JPanel {
 
     public void loadData(Orders order) {
         this.currentOrder = order;
-        ((JLabel)getComponent(0)).setText("Chọn Món - Bàn " + order.getTable_id());
+        String titleText = String.format("Bàn %d - Nhân viên: %s",
+                order.getTable_id(),
+                order.getEmployee_name());
+        ((JLabel)getComponent(0)).setText(titleText);
         displayMenuItemsByCategory("Tất cả");
         updateCurrentOrderUI();
     }
@@ -189,21 +192,13 @@ public class OrderScreen extends JPanel {
         if (items.isEmpty()) {
             orderItemsListModel.addElement("Chưa có món nào...");
         }
-        try {
-            for (OrderItems oi : items) {
-                MenuItems menuItem = MenuItems.findById(oi.getMenu_item_id());
-                if (menuItem != null) {
-                    String itemName = menuItem.getName();
-                    String entry = String.format("<html><b>%s</b> (x%d)<br>&nbsp;&nbsp;%s</html>",
-                            itemName,
-                            oi.getQuantity(),
-                            currencyFormatter.format(oi.getPrice() * oi.getQuantity()));
-                    orderItemsListModel.addElement(entry);
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            showError("Lỗi CSDL khi tải chi tiết giỏ hàng!");
+        for (OrderItems oi : items) {
+            String itemName = oi.getMenu_item_name();
+            String entry = String.format("<html><b>%s</b> (x%d)<br>&nbsp;&nbsp;%s</html>",
+                    itemName,
+                    oi.getQuantity(),
+                    currencyFormatter.format(oi.getPrice() * oi.getQuantity()));
+            orderItemsListModel.addElement(entry);
         }
 
         totalLabel.setText("Tổng tiền: " + currencyFormatter.format(currentOrder.calculateTotal()));
