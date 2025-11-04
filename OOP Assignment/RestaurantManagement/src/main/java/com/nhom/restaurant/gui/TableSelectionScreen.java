@@ -15,7 +15,7 @@ public class TableSelectionScreen extends JPanel {
 
     private MainApplication mainApp;
     private OrderManager orderManager;
-    private JPanel tableGridPanel; // Panel trung tâm để chứa các nút bàn
+    private JPanel tableGridPanel;
 
     private List<Tables> allTablesList;
 
@@ -33,7 +33,7 @@ public class TableSelectionScreen extends JPanel {
         JPanel floorSelectionPanel = createFloorSelectionPanel();
         add(floorSelectionPanel, BorderLayout.WEST);
 
-        tableGridPanel = new JPanel(new GridLayout(0, 4, 15, 15)); // 15px khoảng cách
+        tableGridPanel = new JPanel(new GridLayout(0, 4, 15, 15));
         tableGridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JScrollPane scrollPane = new JScrollPane(tableGridPanel);
@@ -47,7 +47,7 @@ public class TableSelectionScreen extends JPanel {
     public void loadData() {
         try {
             this.allTablesList = Tables.findAll();
-            displayTablesForFloor(1); // Hiển thị tầng 1 làm mặc định
+            displayTablesForFloor(1);
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -59,7 +59,7 @@ public class TableSelectionScreen extends JPanel {
     }
 
     private JPanel createFloorSelectionPanel() {
-        JPanel panel = new JPanel(new GridLayout(3, 1)); // 3 hàng, 1 cột
+        JPanel panel = new JPanel(new GridLayout(3, 1));
         panel.setBorder(BorderFactory.createTitledBorder("Chọn Tầng"));
 
         JButton floor1Button = new JButton("Tầng 1");
@@ -86,13 +86,9 @@ public class TableSelectionScreen extends JPanel {
 
     private void displayTablesForFloor(int floor) {
         tableGridPanel.removeAll();
-        int startId = (floor - 1) * 12 + 1;
-        int endId = floor * 12;
-
         List<Tables> floorTables = allTablesList.stream()
-                .filter(t -> t.getId() >= startId && t.getId() <= endId)
+                .filter(t -> t.getFloor() == floor)
                 .collect(Collectors.toList());
-
         for (Tables table : floorTables) {
             String buttonText = String.format("<html><center>Bàn %d<br>(%s)</center></html>",
                     table.getId(), table.getStatus());
