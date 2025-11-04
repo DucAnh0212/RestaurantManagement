@@ -11,6 +11,8 @@ import java.util.*;
 public class Orders {
     private int id;
     private int table_id;
+    private int employee_id;
+    private String employee_name;
     private int total_amount;
     private String status;
     private Timestamp created_at;
@@ -26,6 +28,21 @@ public class Orders {
     }
     public int getTotal_amount(){
         return this.total_amount;
+    }
+    public List<OrderItems> getItems() {
+        return this.items;
+    }
+    public int getEmployee_id(){
+        return this.employee_id;
+    }
+    public void setEmployee_id(int a){
+        this.employee_id = a;
+    }
+    public String getEmployee_name(){
+        return this.employee_name;
+    }
+    public void setEmployee_name(String a){
+        this.employee_name = a;
     }
     public String getStatus(){
         return this.status;
@@ -52,20 +69,16 @@ public class Orders {
         this.items = a;
     }
 
-    public void addItem(MenuItems menuItem, int quantity){
+    public void addItem(MenuItems menuItem, int quantity) throws SQLException{
         OrderItems newItem = new OrderItems();
         newItem.setOrderId(this.id);
         newItem.setMenu_item_id(menuItem.getId());
         newItem.setQuantity(quantity);
         newItem.setPrice(menuItem.getPrice());
-        try{
-            newItem.save();
-            this.items.add(newItem);
-            this.updateTotalAmount();
-        }
-        catch (SQLException e){
-            e.printStackTrace();
-        }
+
+        newItem.save();
+        this.items.add(newItem);
+        this.updateTotalAmount();
     }
     public int calculateTotal(){
         int total = 0;
@@ -76,12 +89,13 @@ public class Orders {
         return this.total_amount;
     }
     public void save() throws  SQLException {
-        String sql = "INSERT INTO Orders (TABLE_ID, STATUS, CREATED_AT) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Orders (TABLE_ID, EMPLOYEE_ID, STATUS, CREATED_AT) VALUES (?, ?, ?, ?)";
         try(Connection connection = DatabaseConnector.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             pstmt.setInt(1, this.table_id);
-            pstmt.setString(2, "Đang hoạt động");
-            pstmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            pstmt.setInt(2, this.employee_id);
+            pstmt.setString(3, "Đang hoạt động");
+            pstmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             pstmt.executeUpdate();
 
             try(ResultSet gereratedKeys = pstmt.getGeneratedKeys()){
@@ -130,7 +144,9 @@ public class Orders {
         }
     }
     public static Orders findById(int idToFind) throws  SQLException{
-        String sql = "SELECT * FROM Orders WHERE ID = ?";
+        String sql = "SELECT O.*, E.FULLNAME FROM Orders O " +
+                     "JOIN Employees E ON O.EMPLOYEE_ID = E.ID " +
+                     "WHERE O.ID = ?";
         Orders OrderToFind = null;
         try(Connection connection = DatabaseConnector.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(sql)){
@@ -140,6 +156,8 @@ public class Orders {
                 OrderToFind = new Orders();
                 OrderToFind.setId(rs.getInt("ID"));
                 OrderToFind.setTable_id(rs.getInt("TABLE_ID"));
+                OrderToFind.setEmployee_id(rs.getInt("EMPLOYEE_ID")); // <-- LẤY ID NHÂN VIÊN
+                OrderToFind.setEmployee_name(rs.getString("FULLNAME")); // <-- LẤY TÊN NHÂN VIÊN TỪ JOIN
                 OrderToFind.setStatus(rs.getString("STATUS"));
                 OrderToFind.setTotal_amount(rs.getInt("TOTAL_AMOUNT"));
                 OrderToFind.setCreated_at(rs.getTimestamp("CREATED_AT"));
@@ -149,7 +167,9 @@ public class Orders {
         return OrderToFind;
     }
     public static Orders findActiveByTableId(int table_id) throws  SQLException{
-        String sql = "SELECT * FROM Orders WHERE TABLE_ID = ? AND STATUS = 'Đang hoạt động' LIMIT 1";
+        String sql = "SELECT O.*, E.FULLNAME FROM Orders O " +
+                     "JOIN Employees E ON O.EMPLOYEE_ID = E.ID " +
+                     "WHERE O.TABLE_ID = ? AND O.STATUS = 'Đang hoạt động' LIMIT 1";
         Orders activeOrder = null;
         try (Connection connection = DatabaseConnector.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)){
