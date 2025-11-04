@@ -1,6 +1,7 @@
 package com.nhom.restaurant.gui;
 
 import com.nhom.restaurant.manager.OrderManager;
+import com.nhom.restaurant.models.Employees;
 import com.nhom.restaurant.models.Orders;
 import com.nhom.restaurant.models.Tables;
 
@@ -17,6 +18,7 @@ public class TableSelectionScreen extends JPanel {
     private JPanel tableGridPanel; // Panel trung tâm để chứa các nút bàn
 
     private List<Tables> allTablesList;
+
     public TableSelectionScreen(MainApplication mainApp) {
         this.mainApp = mainApp;
         this.orderManager = new OrderManager();
@@ -40,13 +42,12 @@ public class TableSelectionScreen extends JPanel {
 
         add(scrollPane, BorderLayout.CENTER);
 
-        loadData();
     }
 
     public void loadData() {
         try {
             this.allTablesList = Tables.findAll();
-            displayTablesForFloor(1);
+            displayTablesForFloor(1); // Hiển thị tầng 1 làm mặc định
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -87,6 +88,7 @@ public class TableSelectionScreen extends JPanel {
         tableGridPanel.removeAll();
         int startId = (floor - 1) * 12 + 1;
         int endId = floor * 12;
+
         List<Tables> floorTables = allTablesList.stream()
                 .filter(t -> t.getId() >= startId && t.getId() <= endId)
                 .collect(Collectors.toList());
@@ -121,21 +123,31 @@ public class TableSelectionScreen extends JPanel {
                         "Mở order mới cho Bàn " + selectedTable.getId() + "?",
                         "Xác nhận mở bàn",
                         JOptionPane.YES_NO_OPTION);
-
                 if (confirm == JOptionPane.YES_OPTION) {
-                    Orders newOrder = orderManager.startNewOrder(selectedTable.getId());
+                    Employees currentUser = mainApp.getLoggedInEmployee();
+
+                    if (currentUser == null) {
+                        JOptionPane.showMessageDialog(this, "Lỗi: Không tìm thấy nhân viên đã đăng nhập.", "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    Orders newOrder = orderManager.startNewOrder(selectedTable.getId(), currentUser.getId());
+
                     if (newOrder != null) {
+                        newOrder.setEmployee_name(currentUser.getFull_name());
                         mainApp.switchToOrderScreen(newOrder);
-                    } else {
+                    }
+                    else {
                         JOptionPane.showMessageDialog(this, "Không thể tạo order.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                         loadData();
                     }
                 }
-            } else {
+            }
+            else {
                 Orders activeOrder = Orders.findActiveByTableId(selectedTable.getId());
                 if (activeOrder != null) {
                     mainApp.switchToOrderScreen(activeOrder);
-                } else {
+                }
+                else {
                     JOptionPane.showMessageDialog(this,
                             "Lỗi: Không tìm thấy order đang hoạt động cho bàn này. Đang reset bàn...",
                             "Lỗi dữ liệu",
