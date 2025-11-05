@@ -37,6 +37,7 @@ CREATE TABLE OrderItems(
     FOREIGN KEY (ORDER_ID) REFERENCES Orders(ID),
     FOREIGN KEY (MENU_ITEM_ID) REFERENCES MenuItems(ID)
 );
+
 INSERT INTO MenuItems(NAME, PRICE, CATEGORY) VALUES
 ('Gỏi cuốn tôm thịt', 65000, 'Món Khai Vị'),
 ('Chả giò hải sản', 85000, 'Món Khai Vị'),
@@ -175,19 +176,19 @@ INSERT INTO Tables(FLOOR) VALUES
 (3),
 (3),
 (3);
-INSERT INTO employees(FULLNAME, WORKSHIFT) VALUES
-('Nguyễn Đức Anh', '10:00 - 15:00'),
-('Nguyễn Đức Mạnh', '10:00 - 15:00'),
-('An Việt Quyền', '17:00 - 22:00'),
-('Trương Đức Tùng', '17:00 - 22:00'),
-('Nguyễn Trung Tín', '10:00 - 15:00'),
-('Vũ Minh Sáng', '17:00 - 22:00'),
-('Nguyễn Hải Nam', '10:00 - 15:00'),
-('Trần Hiếu Bình', '10:00 - 15:00'),
-('Nguyễn Gia Bảo', '17:00 - 22:00'),
-('Lê Hải Duy', '17:00 - 22:00'),
-('Thái Anh Quân', '17:00 - 22:00'),
-('Trần Thanh Đạt', '10:00 - 15:00');
+INSERT INTO employees(FULLNAME, SDT, EMAIL, ADDRESS, WORKSHIFT) VALUES
+('Nguyễn Đức Anh', '0901234567', 'anh.nd@nhahang.com', '123 Ba Đình, Hà Nội', '10:00 - 15:00'),
+('Nguyễn Đức Mạnh', '0902345678', 'manh.nd@nhahang.com', '456 Cầu Giấy, Hà Nội', '10:00 - 15:00'),
+('An Việt Quyền', '0913456789', 'quyen.av@nhahang.com', '789 Hai Bà Trưng, Hà Nội', '17:00 - 22:00'),
+('Trương Đức Tùng', '0914567890', 'tung.td@nhahang.com', '101 Đống Đa, Hà Nội', '17:00 - 22:00'),
+('Nguyễn Trung Tín', '0905678901', 'tin.nt@nhahang.com', '202 Hoàn Kiếm, Hà Nội', '10:00 - 15:00'),
+('Vũ Minh Sáng', '0916789012', 'sang.vm@nhahang.com', '303 Tây Hồ, Hà Nội', '17:00 - 22:00'),
+('Nguyễn Hải Nam', '0907890123', 'nam.nh@nhahang.com', '404 Thanh Xuân, Hà Nội', '10:00 - 15:00'),
+('Trần Hiếu Bình', '0908901234', 'binh.th@nhahang.com', '505 Hà Đông, Hà Nội', '10:00 - 15:00'),
+('Nguyễn Gia Bảo', '0919012345', 'bao.ng@nhahang.com', '606 Long Biên, Hà Nội', '17:00 - 22:00'),
+('Lê Hải Duy', '0911234567', 'duy.lh@nhahang.com', '707 Hoàng Mai, Hà Nội', '17:00 - 22:00'),
+('Thái Anh Quân', '0903456789', 'quan.ta@nhahang.com', '808 Nam Từ Liêm, Hà Nội', '17:00 - 22:00'),
+('Trần Thanh Đạt', '0904567890', 'dat.tt@nhahang.com', '909 Bắc Từ Liêm, Hà Nội', '10:00 - 15:00');
 INSERT INTO orders (TABLE_ID, EMPLOYEE_ID, STATUS, TOTAL_AMOUNT, CREATED_AT) VALUES 
 (32, 2, 'Đã thanh toán', 122000, '2025-10-04 10:12:21'),
 (34, 2, 'Đã thanh toán', 308100, '2025-10-04 10:13:50'),
@@ -424,7 +425,7 @@ INSERT INTO OrderItems(ORDER_ID, MENU_ITEM_ID, QUANTITY, PRICE) VALUES
 (6, 89, 4, 25000), 
 (7, 2, 1, 85000), 
 (7, 81, 1, 45000), 
-(8, 74, 1, 105000),
+(8, 74, 1, 105000),	
 (8, 81, 1, 45000), 
 (9, 62, 1, 410000),
 (9, 76, 4, 20000),  
