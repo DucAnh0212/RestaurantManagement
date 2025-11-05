@@ -19,11 +19,12 @@ public class OrderScreen extends JPanel {
     private MainApplication mainApp;
     private OrderManager orderManager;
     private Orders currentOrder;
-
     private JPanel menuGridPanel;
-    private DefaultListModel<String> orderItemsListModel;
-    private JLabel totalLabel;
 
+    private DefaultListModel<OrderItems> orderItemsListModel;
+    private JList<OrderItems> orderItemsJList;
+
+    private JLabel totalLabel;
     private NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
     public OrderScreen(MainApplication mainApp) {
@@ -79,20 +80,45 @@ public class OrderScreen extends JPanel {
 
     private JPanel createCurrentOrderPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setPreferredSize(new Dimension(300, 0));
+        panel.setPreferredSize(new Dimension(350, 0)); // Tăng chiều rộng
         panel.setBorder(BorderFactory.createTitledBorder("Order Hiện Tại"));
 
         orderItemsListModel = new DefaultListModel<>();
-        JList<String> list = new JList<>(orderItemsListModel);
-        panel.add(new JScrollPane(list), BorderLayout.CENTER);
+        orderItemsJList = new JList<>(orderItemsListModel);
+        // Set CellRenderer để JList biết cách hiển thị đối tượng OrderItems
+        orderItemsJList.setCellRenderer(new OrderItemCellRenderer());
+        orderItemsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        panel.add(new JScrollPane(orderItemsJList), BorderLayout.CENTER);
+
+        JPanel itemControlPanel = new JPanel(new GridLayout(1, 3, 5, 5));
+        itemControlPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+
+        JButton btnIncrease = new JButton("+1");
+        JButton btnDecrease = new JButton("-1");
+        JButton btnRemove = new JButton("Xóa Món");
+
+        btnIncrease.setBackground(new Color(200, 255, 200));
+        btnDecrease.setBackground(new Color(255, 220, 220));
+        btnRemove.setBackground(new Color(255, 180, 180));
+
+        itemControlPanel.add(btnIncrease);
+        itemControlPanel.add(btnDecrease);
+        itemControlPanel.add(btnRemove);
+
+        btnIncrease.addActionListener(e -> handleIncreaseQuantity());
+        btnDecrease.addActionListener(e -> handleDecreaseQuantity());
+        btnRemove.addActionListener(e -> handleRemoveItem());
 
         JPanel southPanel = new JPanel(new BorderLayout(5, 5));
+
+        southPanel.add(itemControlPanel, BorderLayout.NORTH);
+
         totalLabel = new JLabel("Tổng tiền: 0 VND");
         totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        southPanel.add(totalLabel, BorderLayout.NORTH);
+        southPanel.add(totalLabel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
-
+        JPanel mainButtonPanel = new JPanel(new GridLayout(1, 3));
         JButton checkoutButton = new JButton("Thanh toán");
         checkoutButton.setBackground(new Color(76, 175, 80));
         checkoutButton.setForeground(Color.WHITE);
@@ -108,10 +134,11 @@ public class OrderScreen extends JPanel {
         completeButton.setForeground(Color.WHITE);
         completeButton.addActionListener(e -> mainApp.switchToTableScreen());
 
-        buttonPanel.add(checkoutButton);
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(completeButton);
-        southPanel.add(buttonPanel, BorderLayout.CENTER);
+        mainButtonPanel.add(checkoutButton);
+        mainButtonPanel.add(cancelButton);
+        mainButtonPanel.add(completeButton);
+        southPanel.add(mainButtonPanel, BorderLayout.SOUTH);
+
         panel.add(southPanel, BorderLayout.SOUTH);
 
         return panel;
@@ -142,13 +169,15 @@ public class OrderScreen extends JPanel {
     private JPanel createMenuItemCard(MenuItems item) {
         JPanel card = new JPanel(new BorderLayout(5, 5));
         card.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true));
-
         try {
             URL imageUrl = new URL("https://placehold.co/150x100?text=" + item.getName().replace(" ", "+"));
             ImageIcon icon = new ImageIcon(imageUrl);
             JLabel imgLabel = new JLabel(icon);
             card.add(imgLabel, BorderLayout.NORTH);
-        } catch (Exception e) { e.printStackTrace(); }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         JPanel infoPanel = new JPanel(new GridLayout(2, 1));
         infoPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -180,28 +209,81 @@ public class OrderScreen extends JPanel {
         try {
             currentOrder.addItem(item, quantity);
             updateCurrentOrderUI();
-        } catch (SQLException ex) {
+        }
+        catch (SQLException ex) {
             ex.printStackTrace();
             showError("Lỗi CSDL khi thêm món!");
+        }
+    }
+
+    private OrderItems getSelectedItemFromList() {
+        OrderItems selectedItem = orderItemsJList.getSelectedValue();
+        if (selectedItem == null) {
+            showError("Vui lòng chọn một món trong giỏ hàng trước.");
+        }
+        return selectedItem;
+    }
+
+    private void handleIncreaseQuantity() {
+        OrderItems selectedItem = getSelectedItemFromList();
+        if (selectedItem == null) return;
+        try {
+            MenuItems menuItem = MenuItems.findById(selectedItem.getMenu_item_id());
+            if (menuItem != null) {
+                currentOrder.addItem(menuItem, 1);
+                updateCurrentOrderUI();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            showError("Lỗi CSDL khi tăng số lượng!");
+        }
+    }
+
+    private void handleDecreaseQuantity() {
+        OrderItems selectedItem = getSelectedItemFromList();
+        if (selectedItem == null) return;
+
+        try {
+            currentOrder.reduceItemQuantity(selectedItem.getId());
+            updateCurrentOrderUI();
+        }
+        catch (SQLException ex) {
+            ex.printStackTrace();
+            showError("Lỗi CSDL khi giảm số lượng!");
+        }
+    }
+
+    private void handleRemoveItem() {
+        OrderItems selectedItem = getSelectedItemFromList();
+        if (selectedItem == null) return;
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Xóa '" + selectedItem.getMenu_item_name() + "' khỏi order?",
+                "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                currentOrder.deleteItem(selectedItem.getId());
+                updateCurrentOrderUI();
+            }
+            catch (SQLException ex) {
+                ex.printStackTrace();
+                showError("Lỗi CSDL khi xóa món!");
+            }
         }
     }
 
     private void updateCurrentOrderUI() {
         orderItemsListModel.clear();
         List<OrderItems> items = currentOrder.getItems();
+
         if (items.isEmpty()) {
-            orderItemsListModel.addElement("Chưa có món nào...");
         }
         for (OrderItems oi : items) {
-            String itemName = oi.getMenu_item_name();
-            String entry = String.format("<html><b>%s</b> (x%d)<br>&nbsp;&nbsp;%s</html>",
-                    itemName,
-                    oi.getQuantity(),
-                    currencyFormatter.format(oi.getPrice() * oi.getQuantity()));
-            orderItemsListModel.addElement(entry);
+            orderItemsListModel.addElement(oi);
         }
 
         totalLabel.setText("Tổng tiền: " + currencyFormatter.format(currentOrder.calculateTotal()));
+        orderItemsJList.revalidate();
+        orderItemsJList.repaint();
     }
 
     private void handleCheckout() {
@@ -209,7 +291,8 @@ public class OrderScreen extends JPanel {
             orderManager.checkOut(currentOrder.getID());
             JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
             mainApp.switchToTableScreen();
-        } catch (SQLException ex) {
+        }
+        catch (SQLException ex) {
             ex.printStackTrace();
             showError("Lỗi CSDL khi thanh toán!");
         }
@@ -218,13 +301,13 @@ public class OrderScreen extends JPanel {
     private void handleCancel() {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc muốn huỷ order này?", "Xác nhận huỷ", JOptionPane.YES_NO_OPTION);
-
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 orderManager.cancelOrder(currentOrder.getID());
                 JOptionPane.showMessageDialog(this, "Đã huỷ order.");
                 mainApp.switchToTableScreen();
-            } catch (SQLException ex) {
+            }
+            catch (SQLException ex) {
                 ex.printStackTrace();
                 showError("Lỗi CSDL khi huỷ order!");
             }
@@ -233,5 +316,37 @@ public class OrderScreen extends JPanel {
 
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
+
+    class OrderItemCellRenderer extends JLabel implements ListCellRenderer<OrderItems> {
+        public OrderItemCellRenderer() {
+            setOpaque(true);
+        }
+        @Override
+        public Component getListCellRendererComponent(JList<? extends OrderItems> list,
+                                                      OrderItems oi,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+
+            String itemName = oi.getMenu_item_name();
+            String entry = String.format("<html><div style='padding: 5px; border-bottom: 1px solid #eeeeee;'>" +
+                            "<b>%s</b> (x%d)" +
+                            "<br>&nbsp;&nbsp;%s" +
+                            "</div></html>",
+                    itemName,
+                    oi.getQuantity(),
+                    currencyFormatter.format(oi.getPrice() * oi.getQuantity()));
+            setText(entry);
+            if (isSelected) {
+                setBackground(list.getSelectionBackground());
+                setForeground(list.getSelectionForeground());
+            }
+            else {
+                setBackground(list.getBackground());
+                setForeground(list.getForeground());
+            }
+            return this;
+        }
     }
 }
