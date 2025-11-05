@@ -68,18 +68,65 @@ public class Orders {
     public void setItems(List<OrderItems> a){
         this.items = a;
     }
+    private OrderItems findItemInCart(int menuItemId){
+        for (OrderItems item : this.items){
+            if(item.getMenu_item_id() == menuItemId){
+                return item;
+            }
+        }
+        return null;
+    }
 
+    private OrderItems findItemCartbyOrderItemId(int orderItemId){
+        for(OrderItems item : this.items){
+            if(item.getId() == orderItemId){
+                return item;
+            }
+        }
+        return null;
+    }
     public void addItem(MenuItems menuItem, int quantity) throws SQLException{
-        OrderItems newItem = new OrderItems();
-        newItem.setOrderId(this.id);
-        newItem.setMenu_item_id(menuItem.getId());
-        newItem.setQuantity(quantity);
-        newItem.setPrice(menuItem.getPrice());
-
-        newItem.save();
-        this.items.add(newItem);
+        OrderItems existingItem = findItemInCart(menuItem.getId());
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.update();
+        }
+        else {
+            OrderItems newItem = new OrderItems();
+            newItem.setOrderId(this.id);
+            newItem.setMenu_item_id(menuItem.getId());
+            newItem.setQuantity(quantity);
+            newItem.setPrice(menuItem.getPrice());
+            newItem.setMenu_item_name(menuItem.getName());
+            newItem.save();
+            this.items.add(newItem);
+            this.fetchOrderItems();
+        }
         this.updateTotalAmount();
     }
+    public void deleteItem(int orderItemId) throws SQLException{
+        OrderItems itemToDelete = findItemCartbyOrderItemId(orderItemId);
+        if(itemToDelete != null){
+            itemToDelete.delete();
+            this.items.remove(itemToDelete);
+            this.updateTotalAmount();
+        }
+    }
+    public void reduceItemQuantity(int orderItemId) throws  SQLException {
+        OrderItems itemToReduce = findItemCartbyOrderItemId(orderItemId);
+        if(itemToReduce != null){
+            int currentQuantity = itemToReduce.getQuantity();
+            if(currentQuantity > 1){
+                itemToReduce.setQuantity((currentQuantity - 1));
+                itemToReduce.update();
+            }
+            else{
+                deleteItem(orderItemId);
+            }
+            this.updateTotalAmount();
+        }
+    }
+
     public int calculateTotal(){
         int total = 0;
         for(OrderItems b : this.items){
@@ -159,8 +206,8 @@ public class Orders {
                 OrderToFind = new Orders();
                 OrderToFind.setId(rs.getInt("ID"));
                 OrderToFind.setTable_id(rs.getInt("TABLE_ID"));
-                OrderToFind.setEmployee_id(rs.getInt("EMPLOYEE_ID")); 
-                OrderToFind.setEmployee_name(rs.getString("FULLNAME")); 
+                OrderToFind.setEmployee_id(rs.getInt("EMPLOYEE_ID"));
+                OrderToFind.setEmployee_name(rs.getString("FULLNAME"));
                 OrderToFind.setStatus(rs.getString("STATUS"));
                 OrderToFind.setTotal_amount(rs.getInt("TOTAL_AMOUNT"));
                 OrderToFind.setCreated_at(rs.getTimestamp("CREATED_AT"));
@@ -187,7 +234,7 @@ public class Orders {
                 activeOrder.setCreated_at(rs.getTimestamp("CREATED_AT"));
                 activeOrder.fetchOrderItems();
             }
-        }
+        }s
         return activeOrder;
     }
     public void updateTotalAmount() throws SQLException {
