@@ -81,5 +81,13 @@ public class OrderItems {
             preparedStatement.executeUpdate();
         }
     }
+    public void delete() throws SQLException {
+        String sql = "DELETE FROM OrderItems WHERE ID = ?";
+        try(Connection connection = DatabaseConnector.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(sql)){
+            pstmt.setInt(1, this.id);
+            pstmt.executeUpdate();
+        }
+    }
 }
 
