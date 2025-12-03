@@ -234,7 +234,7 @@ public class Orders {
                 activeOrder.setCreated_at(rs.getTimestamp("CREATED_AT"));
                 activeOrder.fetchOrderItems();
             }
-        }s
+        }
         return activeOrder;
     }
     public void updateTotalAmount() throws SQLException {
@@ -248,3 +248,4 @@ public class Orders {
         }
     }
 }
+
